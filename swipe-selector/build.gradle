@@ -22,7 +22,25 @@ ext {
     licenseName = 'The Apache Software License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     allLicenses = ["Apache-2.0"]
+
+    appcompatVersion          = '23.2.0'
+    junitVersion              = '4.12'
+    androidTestSupportVersion = '0.5'
+    lintVersion               = '25.1.2'
 }
+
+ext.deps = [
+        appcompat  : "com.android.support:appcompat-v7:${appcompatVersion}",
+
+        // Test deps
+        junit      : "junit:junit:${junitVersion}",
+        androidTestRunner : "com.android.support.test:runner:${androidTestSupportVersion}",
+        androidTestRules  : "com.android.support.test:rules:${androidTestSupportVersion}",
+
+        // Lint
+        lintapi    : "com.android.tools.lint:lint-api:${lintVersion}",
+        lintchecks : "com.android.tools.lint:lint-checks:${lintVersion}"
+]
 
 android {
     compileSdkVersion 23
@@ -49,59 +67,13 @@ configurations {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile deps.appcompat
-
-    testCompile deps.junit
-    androidTestCompile deps.junit
-    androidTestCompile deps.androidTestRunner
-    androidTestCompile deps.androidTestRules
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation deps.appcompat
 }
 
-apply plugin: 'com.github.dcendents.android-maven'
+//apply plugin: 'com.github.dcendents.android-maven'
 
 group = publishedGroupId                               // Maven Group ID for the artifact
-
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            project {
-                packaging 'aar'
-                groupId publishedGroupId
-                artifactId artifact
-
-                // Add your description here
-                name libraryName
-                description libraryDescription
-                url siteUrl
-
-                // Set your license
-                licenses {
-                    license {
-                        name licenseName
-                        url licenseUrl
-                    }
-                }
-                developers {
-                    developer {
-                        id developerId
-                        name developerName
-                        email developerEmail
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-
-                }
-            }
-        }
-    }
-}
-
-apply plugin: 'com.jfrog.bintray'
 
 version = libraryVersion
 
@@ -130,33 +102,4 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives javadocJar
     archives sourcesJar
-}
-
-// Bintray
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = bintrayRepo
-        name = bintrayName
-        desc = libraryDescription
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = allLicenses
-        publish = true
-        publicDownloadNumbers = true
-        version {
-            desc = libraryDescription
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password")
-                //Optional. The passphrase for GPG signing'
-            }
-        }
-    }
 }
